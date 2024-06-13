@@ -794,7 +794,7 @@ MonoBehaviour:
   height: 30
   terrainOffsetX: 50
   terrainOffsetY: 50
-  noiseFrequency: 5
+  noiseFrequency: 9
   heavyGrassThreshold: 0.75
   mildGrassThreshold: 0.5
   mountainThreshold: 0.75

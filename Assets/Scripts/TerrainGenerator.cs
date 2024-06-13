@@ -32,16 +32,15 @@ public class TerrainGenerator : MonoBehaviour
     [SerializeField] private float villageThreshold = 0.2f;
     [SerializeField] private float riverThreshold = 0.1f;
 
-    private int seedMax = 100000000;
+    private int seedMin = 10000;
+    private int seedMax = 10000000;
     public int mapSeed {  get; [SerializeField] private set; }
 
     // Start is called before the first frame update
     void Start()
     {
-        if (mapSeed == 0)
-        {
-            mapSeed = GenerateSeed();
-        }
+
+        mapSeed = GenerateSeed();
 
         GenerateTerrain();
     }
@@ -54,7 +53,7 @@ public class TerrainGenerator : MonoBehaviour
 
     public int GenerateSeed()
     {
-        return Random.Range(1, seedMax);
+        return Random.Range(seedMin, seedMax);
     }
 
     private void GenerateGroundLayer()
@@ -63,7 +62,7 @@ public class TerrainGenerator : MonoBehaviour
         { 
             for (int j = 0; j < height; j++)
             {
-                float noiseValue = Mathf.PerlinNoise(i / noiseFrequency, j / noiseFrequency);
+                float noiseValue = Mathf.PerlinNoise((i + mapSeed) / noiseFrequency, (j + mapSeed) / noiseFrequency);
                 Debug.Log(noiseValue + $"at position {i}, {j}");
                 if (noiseValue > heavyGrassThreshold)
                 {
@@ -88,7 +87,7 @@ public class TerrainGenerator : MonoBehaviour
         {
             for (int j = 0; j < height; j++)
             {
-                float noiseValue = Mathf.PerlinNoise((i / noiseFrequency) + terrainOffsetX, (j / noiseFrequency) + terrainOffsetY);
+                float noiseValue = Mathf.PerlinNoise(((i + mapSeed) / noiseFrequency) + terrainOffsetX, ((j + mapSeed) / noiseFrequency) + terrainOffsetY);
                 Debug.Log(noiseValue + $"at position {i}, {j}");
                 if (noiseValue > mountainThreshold)
                 {
