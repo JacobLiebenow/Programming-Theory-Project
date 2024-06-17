@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -43,8 +44,17 @@ public class TerrainGenerator : MonoBehaviour
         mapSeed = GenerateSeed();
 
         GenerateTerrain();
+
     }
-    
+
+    private void Update()
+    {
+        if(Input.GetMouseButtonDown(0))
+        {
+            HandleTileSelection();
+        }
+    }
+
     public void GenerateTerrain()
     {
         GenerateGroundLayer();
@@ -137,7 +147,6 @@ public class TerrainGenerator : MonoBehaviour
     }
 
 
-
     public Vector3Int GetGridCoordinates(Vector2 gridPosition)
     {
         return terrainTilemap.WorldToCell(gridPosition);
@@ -146,5 +155,25 @@ public class TerrainGenerator : MonoBehaviour
     public Vector2 GetGridPosition(Vector3Int gridCoordinates)
     {
         return terrainTilemap.CellToWorld(gridCoordinates);
+    }
+
+    public TileBase GetTileAtPosition(Tilemap tilemap, Vector3 position)
+    {
+        return tilemap.GetTile(GetGridCoordinates(position));
+    }
+
+    public void HandleTileSelection()
+    {
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        GameObject specificTile = terrainTilemap.GetObjectToInstantiate(GetGridCoordinates(mousePos));
+
+        if (specificTile != null)
+        {
+            Debug.Log(specificTile.name);
+        }
+        else
+        {
+            Debug.Log("No terrain feature present!");
+        }
     }
 }
