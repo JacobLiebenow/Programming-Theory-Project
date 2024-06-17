@@ -6,54 +6,65 @@ using UnityEngine.Tilemaps;
 
 public class TerrainGenerator : MonoBehaviour
 {
+    [SerializeField] private Grid terrainGrid;
     [SerializeField] private Tilemap groundTilemap;
-    [SerializeField] private Tilemap terrainTilemap;
+    [SerializeField] private Tilemap forestTilemap;
+    [SerializeField] private Tilemap lakeTilemap;
+    [SerializeField] private Tilemap mountainTilemap;
+    [SerializeField] private Tilemap villageTilemap;
 
     [SerializeField] private Tile baseGrassTile;
     [SerializeField] private Tile mildGrassTile;
     [SerializeField] private Tile heavyGrassTile;
     [SerializeField] private RuleTile heavyForestRuleTile;
+    [SerializeField] private RuleTile lightForestRuleTile;
     [SerializeField] private RuleTile mountainRuleTile;
+    [SerializeField] private RuleTile hillRuleTile;
     [SerializeField] private RuleTile lakeRuleTile;
     [SerializeField] private RuleTile villageRuleTile;
-
-    
 
     [SerializeField] private float terrainOffsetX = 50f;
     [SerializeField] private float terrainOffsetY = 50f;
 
-    [SerializeField] private float noiseFrequency = 5f;
+    [SerializeField] private float noiseFrequency = 9f;
 
     [SerializeField] private float heavyGrassThreshold = 0.75f;
     [SerializeField] private float mildGrassThreshold = 0.5f;
 
     [SerializeField] private float mountainThreshold = 0.8f;
     [SerializeField] private float heavyForestThreshold = 0.6f;
-    [SerializeField] private float grassThreshold = 0.3f;
+    [SerializeField] private float hillsThreshold = 0.415f;
+    [SerializeField] private float grassTopTheshold = 0.4f;
+    [SerializeField] private float lightForestTopThreshold = 0.35f;
+    [SerializeField] private float lightForestBottomThreshold = 0.335f;
+    [SerializeField] private float grassBottomThreshold = 0.22f;
     [SerializeField] private float villageThreshold = 0.2f;
-    [SerializeField] private float riverThreshold = 0.1f;
+    [SerializeField] private float waterThreshold = 0.175f;
 
+    // These will likely eventually be shifted to a persistent data class at some point
     private int seedMin = 10000;
     private int seedMax = 10000000;
     public int mapSeed {  get; private set; }
+
+    public bool isMapSet {  get; private set; }
 
     private int m_Width = 40;
     public int width
     {
         get { return m_Width; }
-        private set
+        set
         {
-            if (value < 10)
+            if (value < 10 && !isMapSet)
             {
                 Debug.Log("Cannot have a grid width smaller than 10");
                 m_Width = 10;
             }
-            else if (value > 255)
+            else if (value > 255 && !isMapSet)
             {
                 Debug.Log("Cannot have a grid width greater than 255");
                 m_Width = 255;
             }
-            else
+            else if (!isMapSet)
             {
                 m_Width = value;
             }
@@ -64,7 +75,7 @@ public class TerrainGenerator : MonoBehaviour
     public int height
     {
         get { return m_Height; }
-        private set
+        set
         {
             if (value < 10)
             {
@@ -119,7 +130,7 @@ public class TerrainGenerator : MonoBehaviour
             for (int j = 0; j < height; j++)
             {
                 float noiseValue = Mathf.PerlinNoise((i + mapSeed) / noiseFrequency, (j + mapSeed) / noiseFrequency);
-                Debug.Log(noiseValue + $"at position {i}, {j}");
+                //Debug.Log(noiseValue + $"at position {i}, {j}");
                 if (noiseValue > heavyGrassThreshold)
                 {
                     PlaceTile(groundTilemap, heavyGrassTile, i, j);
@@ -145,21 +156,33 @@ public class TerrainGenerator : MonoBehaviour
             {
                 float noiseValue = Mathf.PerlinNoise(((i + mapSeed) / noiseFrequency) + terrainOffsetX, ((j + mapSeed) / noiseFrequency) + terrainOffsetY);
                 Debug.Log(noiseValue + $"at position {i}, {j}");
+
+                // To make this look graphically smoother, forest is to be placed before mountains
+                if (noiseValue > heavyForestThreshold)
+                {
+                    PlaceTile(forestTilemap, heavyForestRuleTile, i, j);
+                } else if (noiseValue > lightForestBottomThreshold && noiseValue < lightForestTopThreshold)
+                {
+                    PlaceTile(forestTilemap, lightForestRuleTile, i, j);
+                }
+
                 if (noiseValue > mountainThreshold)
                 {
-                    PlaceTile(terrainTilemap, mountainRuleTile, i, j);
-                }
-                else if (noiseValue > heavyForestThreshold)
-                {
-                    PlaceTile(terrainTilemap, heavyForestRuleTile, i, j);
+                    PlaceTile(mountainTilemap, mountainRuleTile, i, j);
                 } 
-                else if (noiseValue < grassThreshold && noiseValue > villageThreshold)
+                else if (noiseValue > grassTopTheshold && noiseValue < hillsThreshold)
                 {
-                    PlaceTile(terrainTilemap, villageRuleTile, i, j);
+                    PlaceTile(mountainTilemap, hillRuleTile, i, j);
                 }
-                else if (noiseValue < riverThreshold) 
+
+                if (noiseValue < grassBottomThreshold && noiseValue > villageThreshold)
                 {
-                    PlaceTile(terrainTilemap, lakeRuleTile, i, j);
+                    PlaceTile(villageTilemap, villageRuleTile, i, j);
+                }
+
+                if (noiseValue < waterThreshold) 
+                {
+                    PlaceTile(lakeTilemap, lakeRuleTile, i, j);
                 }
             }
         }
@@ -195,12 +218,12 @@ public class TerrainGenerator : MonoBehaviour
 
     public Vector3Int GetGridCoordinates(Vector2 gridPosition)
     {
-        return terrainTilemap.WorldToCell(gridPosition);
+        return groundTilemap.WorldToCell(gridPosition);
     }
     
     public Vector2 GetGridPosition(Vector3Int gridCoordinates)
     {
-        return terrainTilemap.CellToWorld(gridCoordinates);
+        return groundTilemap.CellToWorld(gridCoordinates);
     }
 
     public TileBase GetTileAtPosition(Tilemap tilemap, Vector3 position)
@@ -211,15 +234,20 @@ public class TerrainGenerator : MonoBehaviour
     public void HandleTileSelection()
     {
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        GameObject specificTile = terrainTilemap.GetObjectToInstantiate(GetGridCoordinates(mousePos));
+        List<GameObject> objectsAtLocation = new List<GameObject>();
 
-        if (specificTile != null)
+        for (int i = 1; i < terrainGrid.transform.childCount; i++)
         {
-            Debug.Log(specificTile.name);
+            Tilemap tilemap = terrainGrid.transform.GetChild(i).gameObject.GetComponent<Tilemap>();
+            GameObject instantiatedObject = tilemap.GetObjectToInstantiate(GetGridCoordinates(mousePos));
+
+            if (instantiatedObject != null)
+            {
+                objectsAtLocation.Add(instantiatedObject);
+                Debug.Log("Object added: " + instantiatedObject.name);
+            }
         }
-        else
-        {
-            Debug.Log("No terrain feature present!");
-        }
+
+        Debug.Log("Total objects at location: " + objectsAtLocation.Count);
     }
 }
