@@ -17,8 +17,8 @@ public class TerrainGenerator : MonoBehaviour
     [SerializeField] private RuleTile lakeRuleTile;
     [SerializeField] private RuleTile villageRuleTile;
 
-    [SerializeField] private int width;
-    [SerializeField] private int height;
+    
+
     [SerializeField] private float terrainOffsetX = 50f;
     [SerializeField] private float terrainOffsetY = 50f;
 
@@ -35,10 +35,56 @@ public class TerrainGenerator : MonoBehaviour
 
     private int seedMin = 10000;
     private int seedMax = 10000000;
-    public int mapSeed {  get; [SerializeField] private set; }
+    public int mapSeed {  get; private set; }
+
+    private int m_Width = 40;
+    public int width
+    {
+        get { return m_Width; }
+        private set
+        {
+            if (value < 10)
+            {
+                Debug.Log("Cannot have a grid width smaller than 10");
+                m_Width = 10;
+            }
+            else if (value > 255)
+            {
+                Debug.Log("Cannot have a grid width greater than 255");
+                m_Width = 255;
+            }
+            else
+            {
+                m_Width = value;
+            }
+        }
+    }
+
+    private int m_Height = 30;
+    public int height
+    {
+        get { return m_Height; }
+        private set
+        {
+            if (value < 10)
+            {
+                Debug.Log("Cannot have a grid height smaller than 10");
+                m_Height = 10;
+            }
+            else if (value > 255)
+            {
+                Debug.Log("Cannot have a grid height greater than 255");
+                m_Height = 255;
+            }
+            else
+            {
+                m_Height = value;
+            }
+        }
+    }
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
 
         mapSeed = GenerateSeed();
