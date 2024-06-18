@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -99,11 +100,8 @@ public class TerrainGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-
         mapSeed = GenerateSeed();
-        GenerateTerrain();
-
-        pathfinding = new Pathfinding(this, terrainGrid, width, height);
+        GenerateTerrain(true);
 
     }
 
@@ -117,10 +115,10 @@ public class TerrainGenerator : MonoBehaviour
 
 
 
-    public void GenerateTerrain()
+    public void GenerateTerrain(bool isMakingRiver = false)
     {
         GenerateGroundLayer();
-        GenerateTerrainLayer();
+        GenerateTerrainLayer(isMakingRiver);
     }
 
     public int GenerateSeed()
@@ -153,8 +151,15 @@ public class TerrainGenerator : MonoBehaviour
         Debug.Log("Ground generated!");
     }
 
-    private void GenerateTerrainLayer()
+    private void GenerateTerrainLayer(bool isMakingRiver = false)
     {
+        float startMin = int.MaxValue;
+        float endMin = int.MaxValue;
+        int startX = 0;
+        int startY = 0;
+        int endX = 0; 
+        int endY = 0;
+
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
@@ -190,8 +195,42 @@ public class TerrainGenerator : MonoBehaviour
                 {
                     PlaceTile(lakeTilemap, lakeRuleTile, i, j);
                 }
+
+
+
+                if (isMakingRiver && i == 0)
+                {
+                    if(noiseValue < startMin)
+                    {
+                        startMin = noiseValue;
+                        startX = i;
+                        startY = j;
+                    }
+                }
+                else if (isMakingRiver && i == width - 1)
+                {
+                    if (noiseValue < endMin)
+                    {
+                        endMin = noiseValue;
+                        endX = i;
+                        endY = j;
+                    }
+                }
             }
         }
+
+        // Note: the pathfinding algorithm needs to be initialized *AFTER* the terrain grid so the
+        // terrain costs can be properly calculated.  This is to lower computing costs.
+        if (pathfinding == null)
+        {
+            pathfinding = new Pathfinding(this, terrainGrid, width, height);
+        }
+
+        if(isMakingRiver)
+        {
+            PlaceRiver(pathfinding.FindPath(startX, startY, endX, endY, false, 0));
+        }
+
         Debug.Log("Terrain generated!");
     }
 
@@ -202,6 +241,26 @@ public class TerrainGenerator : MonoBehaviour
         Vector3Int coordinates = new Vector3Int(gridX, gridY);
         tilemap.SetTile(coordinates, tile);
     }
+
+
+
+    private void PlaceRiver(List<TerrainFeatureData> path)
+    {
+        foreach (TerrainFeatureData pathNode in path)
+        {
+            Vector3Int gridCoordinates = new Vector3Int(pathNode.xPos, pathNode.yPos);
+
+            for(int i = 1; i < terrainGrid.transform.childCount; i++)
+            {
+                terrainGrid.transform.GetChild(i).GetComponent<Tilemap>().SetTile(gridCoordinates, null);
+            }
+
+            lakeTilemap.SetTile(gridCoordinates, lakeRuleTile);
+        }
+
+        RefreshGridTiles();
+    }
+
 
     public Vector3Int GetGridCoordinates(Vector2 gridPosition)
     {
@@ -238,8 +297,6 @@ public class TerrainGenerator : MonoBehaviour
         }
 
         Debug.Log("Total objects at location: " + objectsAtLocation.Count);
-
-        Debug.Log("Fastest distance from origin: " + pathfinding.FindPath(0, 0, GetGridCoordinates(mousePos).x, GetGridCoordinates(mousePos).y));
     }
 
     public TerrainFeature SelectPathfindingTile(Tilemap tilemapLayer, int xPos, int yPos)
@@ -253,5 +310,13 @@ public class TerrainGenerator : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void RefreshGridTiles()
+    {
+        for (int i = 1; i < terrainGrid.transform.childCount; i++)
+        {
+            terrainGrid.transform.GetChild(i).GetComponent<Tilemap>().RefreshAllTiles();
+        }
     }
 }

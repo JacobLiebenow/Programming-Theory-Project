@@ -45,5 +45,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   riverCost: 0
-  roadCost: 5
+  roadCost: 50
   hasWater: 1

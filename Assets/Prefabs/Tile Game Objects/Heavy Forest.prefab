@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c09111bd45e957945952a928c49cf496, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  riverCost: 40
-  roadCost: 25
+  riverCost: 1000
+  roadCost: 250
   hasWater: 0
   wood: 250
