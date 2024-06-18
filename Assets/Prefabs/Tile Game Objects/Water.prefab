@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 921236670496757412}
+  - component: {fileID: 8352132153851209949}
   m_Layer: 0
   m_Name: Water
   m_TagString: Untagged
@@ -31,3 +32,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8352132153851209949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6352253070989639820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2edce6d3e5a09e04095877e279d69183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  riverCost: 0
+  roadCost: 5
+  hasWater: 1
