@@ -48,7 +48,6 @@ public class TerrainGenerator : MonoBehaviour
     private int seedMin = 10000;
     private int seedMax = 10000000;
     public int mapSeed {  get; private set; }
-
     public bool isMapSet {  get; private set; }
 
     private int m_Width = 40;
@@ -97,6 +96,8 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
+    public int gridPadding = 1;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -128,9 +129,9 @@ public class TerrainGenerator : MonoBehaviour
 
     private void GenerateGroundLayer()
     {
-        for (int i = 0;  i < width; i++) 
+        for (int i = 0;  i < width + 2 * gridPadding; i++) 
         { 
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < height + 2 * gridPadding; j++)
             {
                 float noiseValue = Mathf.PerlinNoise((i + mapSeed) / noiseFrequency, (j + mapSeed) / noiseFrequency);
                 //Debug.Log(noiseValue + $" at position {i}, {j}");
@@ -160,9 +161,9 @@ public class TerrainGenerator : MonoBehaviour
         int endX = 0; 
         int endY = 0;
 
-        for (int i = 0; i < width; i++)
+        for (int i = 0; i < width + 2 * gridPadding; i++)
         {
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < height + 2 * gridPadding; j++)
             {
                 float noiseValue = Mathf.PerlinNoise(((i + mapSeed) / noiseFrequency) + terrainOffsetX, ((j + mapSeed) / noiseFrequency) + terrainOffsetY);
                 //Debug.Log(noiseValue + $" at position {i}, {j}");
@@ -186,7 +187,7 @@ public class TerrainGenerator : MonoBehaviour
                     PlaceTile(mountainTilemap, hillRuleTile, i, j);
                 }
 
-                if (noiseValue < grassBottomThreshold && noiseValue > villageThreshold)
+                if (noiseValue < grassBottomThreshold && noiseValue > villageThreshold && (i < (width + (2 * gridPadding) - 1) && i >= gridPadding) && (j < (height + (2 * gridPadding) - 1) && j >= gridPadding))
                 {
                     PlaceTile(villageTilemap, villageRuleTile, i, j);
                 }
@@ -207,7 +208,7 @@ public class TerrainGenerator : MonoBehaviour
                         startY = j;
                     }
                 }
-                else if (isMakingRiver && i == width - 1)
+                else if (isMakingRiver && i == (width + (2 * gridPadding) - 1))
                 {
                     if (noiseValue < endMin)
                     {
@@ -223,7 +224,7 @@ public class TerrainGenerator : MonoBehaviour
         // terrain costs can be properly calculated.  This is to lower computing costs.
         if (pathfinding == null)
         {
-            pathfinding = new Pathfinding(this, terrainGrid, width, height);
+            pathfinding = new Pathfinding(this, terrainGrid, width + (2 * gridPadding), height + (2 * gridPadding));
         }
 
         if(isMakingRiver)
@@ -319,4 +320,5 @@ public class TerrainGenerator : MonoBehaviour
             terrainGrid.transform.GetChild(i).GetComponent<Tilemap>().RefreshAllTiles();
         }
     }
+
 }

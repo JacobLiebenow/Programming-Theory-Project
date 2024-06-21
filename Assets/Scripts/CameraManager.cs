@@ -47,10 +47,10 @@ public class CameraManager : MonoBehaviour
     
     private void SetCameraBounds()
     {
-        boundsLeftX = camWidth;
-        boundsRightX = terrainGenerator.width - camWidth;
-        boundsTopY = terrainGenerator.height - camHeight;
-        boundsBottomY = camHeight;
+        boundsLeftX = camWidth + terrainGenerator.gridPadding;
+        boundsRightX = terrainGenerator.width - camWidth + terrainGenerator.gridPadding;
+        boundsTopY = terrainGenerator.height - camHeight + terrainGenerator.gridPadding;
+        boundsBottomY = camHeight + terrainGenerator.gridPadding;
     }
 
     private void HandleMiddleMouseDrag()

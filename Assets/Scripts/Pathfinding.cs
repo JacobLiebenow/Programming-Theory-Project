@@ -28,6 +28,7 @@ public class Pathfinding
         this.terrainGrid = terrainGrid;
         this.width = width;
         this.height = height;
+        Debug.Log($"Pathfinding initialized with grid size of {width}x{height}");
         InitializeGrid();
     }
 
@@ -132,9 +133,9 @@ public class Pathfinding
     {
         terrainGridList = new List<TerrainFeatureData>();
 
-        for (int i = 0; i < terrainGenerator.width; i++)
+        for (int i = 0; i < width; i++)
         {
-            for (int j = 0; j < terrainGenerator.height; j++)
+            for (int j = 0; j < height; j++)
             {
                 TerrainFeatureData terrainFeature = new TerrainFeatureData(i, j);
                 //Debug.Log("Calculating terrain features...");
@@ -181,7 +182,7 @@ public class Pathfinding
         }
 
         // Right Neighbor
-        if(currentFeature.xPos + 1 < terrainGenerator.width)
+        if(currentFeature.xPos + 1 < width)
         {
             //Debug.Log("Right neighbor found!");
             neighborFeatures.Add(GetFeature(currentFeature.xPos + 1, currentFeature.yPos));
@@ -195,7 +196,7 @@ public class Pathfinding
         }
 
         // Top Neighbor
-        if(currentFeature.yPos + 1 < terrainGenerator.height)
+        if(currentFeature.yPos + 1 < height)
         {
             //Debug.Log("Up neighbor found!");
             neighborFeatures.Add(GetFeature(currentFeature.xPos, currentFeature.yPos + 1));
@@ -216,7 +217,7 @@ public class Pathfinding
         }
 
         // Right Neighbor
-        if (currentFeature.xPos + 1 < terrainGenerator.width)
+        if (currentFeature.xPos + 1 < width)
         {
             neighborFeatures.Add(GetFeature(currentFeature.xPos + 1, currentFeature.yPos));
         }
@@ -228,7 +229,7 @@ public class Pathfinding
         }
 
         // Top Neighbor
-        if (currentFeature.yPos + 1 < terrainGenerator.height)
+        if (currentFeature.yPos + 1 < height)
         {
             neighborFeatures.Add(GetFeature(currentFeature.xPos, currentFeature.yPos + 1));
         }
