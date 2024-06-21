@@ -1120,7 +1120,7 @@ MonoBehaviour:
   grassBottomThreshold: 0.22
   villageThreshold: 0.2
   waterThreshold: 0.175
-  gridPadding: 1
+  gridPadding: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
