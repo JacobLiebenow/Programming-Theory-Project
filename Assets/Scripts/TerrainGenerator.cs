@@ -187,7 +187,7 @@ public class TerrainGenerator : MonoBehaviour
                     PlaceTile(mountainTilemap, hillRuleTile, i, j);
                 }
 
-                if (noiseValue < grassBottomThreshold && noiseValue > villageThreshold && (i < (width + (2 * gridPadding) - 1) && i >= gridPadding) && (j < (height + (2 * gridPadding) - 1) && j >= gridPadding))
+                if (noiseValue < grassBottomThreshold && noiseValue > villageThreshold && (i < (width + gridPadding) && i >= gridPadding) && (j < (height + gridPadding) && j >= gridPadding))
                 {
                     PlaceTile(villageTilemap, villageRuleTile, i, j);
                 }
