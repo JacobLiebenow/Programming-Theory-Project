@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+//INHERITANCE
 public class LakeFeature : WaterFeature
 {
 

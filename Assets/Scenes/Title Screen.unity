@@ -6328,7 +6328,9 @@ MonoBehaviour:
   gridHeight: 60
   referenceTilemap: {fileID: 1053317639}
   fadeToBlackBackground: {fileID: 207688832}
-  moveSpeed: 9
+  moveSpeed: 3
+  fadeDistance: 2
+  darkDistance: 1
 --- !u!1 &737932610
 GameObject:
   m_ObjectHideFlags: 0

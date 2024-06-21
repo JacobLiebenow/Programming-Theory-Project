@@ -36,7 +36,7 @@ public class CameraManager : MonoBehaviour
         HandleWASDMovement();
     }
 
-
+    //ABSTRACTION
     private void SetCameraDimensions()
     {
         camHeight = Camera.main.orthographicSize;
@@ -44,7 +44,8 @@ public class CameraManager : MonoBehaviour
         Debug.Log("Cam Height: " + camHeight);
         Debug.Log("Cam Width: " + camWidth);
     }
-    
+
+    //ABSTRACTION
     private void SetCameraBounds()
     {
         boundsLeftX = camWidth + terrainGenerator.gridPadding;
@@ -53,6 +54,7 @@ public class CameraManager : MonoBehaviour
         boundsBottomY = camHeight + terrainGenerator.gridPadding;
     }
 
+    //ABSTRACTION
     private void HandleMiddleMouseDrag()
     {
         if (Input.GetMouseButtonDown(2))
@@ -76,6 +78,7 @@ public class CameraManager : MonoBehaviour
         }
     }
 
+    //ABSTRACTION
     private void HandleWASDMovement()
     {
         if ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) && !isDragging)
@@ -101,6 +104,7 @@ public class CameraManager : MonoBehaviour
         }
     }
 
+    //ABSTRACTION
     private void ClampCameraPosition()
     {
         transform.position = new Vector3(Mathf.Clamp(transform.position.x, boundsLeftX, boundsRightX), Mathf.Clamp(transform.position.y, boundsBottomY, boundsTopY), Camera.main.transform.position.z);
