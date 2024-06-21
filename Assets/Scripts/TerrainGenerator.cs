@@ -50,7 +50,7 @@ public class TerrainGenerator : MonoBehaviour
     public int mapSeed {  get; private set; }
     public bool isMapSet {  get; private set; }
 
-    private int m_Width = 40;
+    private int m_Width = 80;
     public int width
     {
         get { return m_Width; }
@@ -73,7 +73,7 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-    private int m_Height = 30;
+    private int m_Height = 80;
     public int height
     {
         get { return m_Height; }
