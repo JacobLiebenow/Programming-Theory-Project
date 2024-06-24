@@ -8,6 +8,7 @@ using UnityEngine.Tilemaps;
 public class TerrainGenerator : MonoBehaviour
 {
     private Pathfinding pathfinding;
+    [SerializeField] private GameObject gameGrid;
 
     [SerializeField] private Grid terrainGrid;
     [SerializeField] private Tilemap groundTilemap;
@@ -51,7 +52,7 @@ public class TerrainGenerator : MonoBehaviour
     public bool isMapSet {  get; private set; }
 
     //ENCAPSULATION
-    private int m_Width = 80;
+    private int m_Width = 40;
     public int width
     {
         get { return m_Width; }
@@ -75,7 +76,7 @@ public class TerrainGenerator : MonoBehaviour
     }
 
     //ENCAPSULATION
-    private int m_Height = 80;
+    private int m_Height = 30;
     public int height
     {
         get { return m_Height; }
@@ -104,8 +105,7 @@ public class TerrainGenerator : MonoBehaviour
     void Awake()
     {
         mapSeed = GenerateSeed();
-        GenerateTerrain(true);
-
+        LoadGrid(true);
     }
 
     private void Update()
@@ -126,8 +126,41 @@ public class TerrainGenerator : MonoBehaviour
 
     public int GenerateSeed()
     {
-        return Random.Range(seedMin, seedMax);
+        if (DataManager.Instance != null && DataManager.Instance.IsGameLoaded)
+        {
+            return DataManager.Instance.Seed;
+        } 
+        else
+        {
+            return Random.Range(seedMin, seedMax);
+        }
     }
+
+
+    private void LoadGrid(bool isMakingRiver = false)
+    {
+        if (DataManager.Instance != null && DataManager.Instance.IsGameLoaded)
+        {
+            gameGrid = DataManager.Instance.GameGrid;
+            terrainGrid = gameGrid.GetComponent<Grid>();
+            groundTilemap = gameGrid.transform.GetChild(0).GetComponent<Tilemap>();
+            forestTilemap = gameGrid.transform.GetChild(1).GetComponent<Tilemap>();
+            lakeTilemap = gameGrid.transform.GetChild(2).GetComponent<Tilemap>();
+            mountainTilemap = gameGrid.transform.GetChild(3).GetComponent<Tilemap>();
+            villageTilemap = gameGrid.transform.GetChild(4).GetComponent<Tilemap>();
+
+            width = DataManager.Instance.Width;
+            height = DataManager.Instance.Height;
+            gridPadding = DataManager.Instance.Padding;
+
+            pathfinding = new Pathfinding(this, terrainGrid, width + (2 * gridPadding), height + (2 * gridPadding));
+        } 
+        else
+        {
+            GenerateTerrain(isMakingRiver);
+        }
+    }
+
 
     private void GenerateGroundLayer()
     {

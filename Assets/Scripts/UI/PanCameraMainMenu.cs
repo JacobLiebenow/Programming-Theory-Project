@@ -99,6 +99,7 @@ public class PanCameraMainMenu : MonoBehaviour
         endingCameraPosition = new Vector3(endingCameraPositionRaw.x, endingCameraPositionRaw.y, transform.position.z);
     }
 
+    // Steadily move from the starting position to the ending positions
     private void MoveToPosition()
     {
         transform.Translate((endingCameraPosition - transform.position).normalized * Time.deltaTime * moveSpeed);
@@ -110,6 +111,7 @@ public class PanCameraMainMenu : MonoBehaviour
         }
     }
 
+    // Fade in as the camera leaves the starting location, and fade out as the camera reaches the ending location
     private void HandleBackgroundFade()
     {
         if (hypotenuse - (endingCameraPosition - transform.position).magnitude < fadeDistance && hypotenuse - (endingCameraPosition - transform.position).magnitude > darkDistance)
