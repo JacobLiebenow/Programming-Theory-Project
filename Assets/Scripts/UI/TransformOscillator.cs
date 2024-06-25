@@ -5,10 +5,10 @@ using TMPro;
 
 public class TransformOscillator : MonoBehaviour
 {
-    [SerializeField] private float amplitude;
-    [SerializeField] private float frequencyRadians;
-    [SerializeField] private float amplitudeOffset;
-    [SerializeField] private float frequencyOffset;
+    [SerializeField] private float amplitude = 0.05f;
+    [SerializeField] private float frequencyRadians = 0.75f;
+    [SerializeField] private float amplitudeOffset = 1f;
+    [SerializeField] private float frequencyOffset = 0f;
     private float baseX;
     private float baseY;
 
@@ -23,14 +23,17 @@ public class TransformOscillator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        OscillateTransform();
+        if(gameObject.activeInHierarchy)
+        {
+            OscillateTransform();
+        }
     }
 
     // Make the given UI component's X and Y-scale values shift at a sinusoidal rate
     private void OscillateTransform()
     {
-        float newX = baseX * (amplitude * Mathf.Sin(frequencyRadians * Mathf.PI * Time.time + frequencyOffset) + amplitudeOffset);
-        float newY = baseY * (amplitude * Mathf.Sin(frequencyRadians * Mathf.PI * Time.time + frequencyOffset) + amplitudeOffset);
+        float newX = baseX * (amplitude * Mathf.Sin(frequencyRadians * Mathf.PI * Time.unscaledTime + frequencyOffset) + amplitudeOffset);
+        float newY = baseY * (amplitude * Mathf.Sin(frequencyRadians * Mathf.PI * Time.unscaledTime + frequencyOffset) + amplitudeOffset);
         Vector2 newScale = new Vector2(newX, newY);
         transform.localScale = newScale;
     }

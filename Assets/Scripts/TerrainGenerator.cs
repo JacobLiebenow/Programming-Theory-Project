@@ -110,10 +110,7 @@ public class TerrainGenerator : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetMouseButtonDown(0))
-        {
-            HandleTileSelection();
-        }
+
     }
 
 
@@ -154,6 +151,7 @@ public class TerrainGenerator : MonoBehaviour
             gridPadding = DataManager.Instance.Padding;
 
             pathfinding = new Pathfinding(this, terrainGrid, width + (2 * gridPadding), height + (2 * gridPadding));
+            isMapSet = true;
         } 
         else
         {
@@ -268,6 +266,7 @@ public class TerrainGenerator : MonoBehaviour
         }
 
         Debug.Log("Terrain generated!");
+        isMapSet = true;
     }
 
 
