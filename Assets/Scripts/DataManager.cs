@@ -16,10 +16,10 @@ public class DataManager : MonoBehaviour
     public int Width;
     public int Height;
     public int Padding;
-    public GameObject GameGrid;
     public int Wood = 0;
     public int Ore = 0;
     public int Population = 0;
+    public List<SaveableTileData> TileData = new List<SaveableTileData>();
 
     public bool IsGameLoaded {  get; private set; }
 
@@ -42,10 +42,10 @@ public class DataManager : MonoBehaviour
         public int Width;
         public int Height;
         public int Padding;
-        public GameObject GameGrid;
         public int Wood;
         public int Ore;
         public int Population;
+        public List<SaveableTileData> TileData = new List<SaveableTileData>();
     }
 
     [Serializable]
@@ -81,10 +81,24 @@ public class DataManager : MonoBehaviour
     }
 
 
-    // Handle saving individual game data by setting a new IndividualSave object, adding it to the saved data list, and then saving the list
-    //
-    // NOTE: This could potentially cause saved game bloat, and it might make more sense to just create saves in a new folder, and loading
-    // file names individually based off that
+    // Reset the data attributes to their default state.  Called when New Game is clicked.
+    public void SetNewGameDefaultData()
+    {
+        SaveName = null;
+        Seed = 0;
+        Width = 0;
+        Height = 0;
+        Padding = 0;
+        Wood = 0;
+        Ore = 0;
+        Population = 0;
+        TileData.Clear();
+
+        IsGameLoaded = false;
+    }
+
+
+    // Save the game to its own individual JSON file in the Saved Games directory
     public void SaveGame()
     {
         IndividualSave save = new IndividualSave();
@@ -94,10 +108,10 @@ public class DataManager : MonoBehaviour
         save.Width = Width;
         save.Height = Height;
         save.Padding = Padding;
-        save.GameGrid = GameGrid;
         save.Wood = Wood;
         save.Ore = Ore;
         save.Population = Population;
+        save.TileData = TileData;
 
         string json = JsonUtility.ToJson(save);
         string path = Application.persistentDataPath + "/" + savedGamesDirectory + "/" + save.SaveName + ".json";
@@ -136,9 +150,7 @@ public class DataManager : MonoBehaviour
     }
     
 
-    // Load the entire saved games list, and then choose an individual game from the list to load
-    //
-    // NOTE: See above note on saved games to potentially increase performance here
+    // Load a saved game based off the given index from its individual save file
     public void LoadGame(int index = 0)
     {
         if (SavedGames.gameNames.Count > 0)
@@ -156,10 +168,10 @@ public class DataManager : MonoBehaviour
                 Width = loadedGame.Width;
                 Height = loadedGame.Height;
                 Padding = loadedGame.Padding;
-                GameGrid = loadedGame.GameGrid;
                 Wood = loadedGame.Wood;
                 Ore = loadedGame.Ore;
                 Population = loadedGame.Population;
+                TileData = loadedGame.TileData;
 
                 IsGameLoaded = true;
             }

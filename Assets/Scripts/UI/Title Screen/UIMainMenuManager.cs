@@ -44,6 +44,10 @@ public class UIMainMenuManager : MonoBehaviour
     // On new game clicked, transition the screen to the New Game menu.  This menu will allow the player to create a game scene based on size data and seed data.
     public void OnNewGameClicked()
     {
+        if(DataManager.Instance != null)
+        {
+            DataManager.Instance.SetNewGameDefaultData();
+        }
         SceneManager.LoadScene(1);
     }
 
@@ -57,6 +61,10 @@ public class UIMainMenuManager : MonoBehaviour
 
         gameLoadedTextCoroutine = ShowGameLoadedText();
         StartCoroutine(gameLoadedTextCoroutine);
+
+        // NOTE: The following will eventually be replaced by changing the state to the load screen ListView, where it will be executed there.
+        DataManager.Instance.LoadGame();
+        SceneManager.LoadScene(1);
     }
 
     // On settings clicked, the settings menu will be loaded for the player, which can be manipulated

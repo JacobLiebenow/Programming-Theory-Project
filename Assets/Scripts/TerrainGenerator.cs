@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using TreeEditor;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -16,6 +17,7 @@ public class TerrainGenerator : MonoBehaviour
     [SerializeField] private Tilemap lakeTilemap;
     [SerializeField] private Tilemap mountainTilemap;
     [SerializeField] private Tilemap villageTilemap;
+    [SerializeField] private Tilemap roadTilemap;
 
     [SerializeField] private RuleTile baseGrassTile;
     [SerializeField] private RuleTile mildGrassTile;
@@ -138,7 +140,6 @@ public class TerrainGenerator : MonoBehaviour
     {
         if (DataManager.Instance != null && DataManager.Instance.IsGameLoaded)
         {
-            gameGrid = DataManager.Instance.GameGrid;
             terrainGrid = gameGrid.GetComponent<Grid>();
             groundTilemap = gameGrid.transform.GetChild(0).GetComponent<Tilemap>();
             forestTilemap = gameGrid.transform.GetChild(1).GetComponent<Tilemap>();
@@ -151,6 +152,9 @@ public class TerrainGenerator : MonoBehaviour
             gridPadding = DataManager.Instance.Padding;
 
             pathfinding = new Pathfinding(this, terrainGrid, width + (2 * gridPadding), height + (2 * gridPadding));
+
+            LoadFromSavedGrid();
+
             isMapSet = true;
         } 
         else
@@ -170,15 +174,15 @@ public class TerrainGenerator : MonoBehaviour
                 //Debug.Log(noiseValue + $" at position {i}, {j}");
                 if (noiseValue > heavyGrassThreshold)
                 {
-                    PlaceTile(groundTilemap, heavyGrassTile, i, j);
+                    PlaceTile(groundTilemap, heavyGrassTile, i, j, (int)TileType.grassHeavy);
                 } 
                 else if (noiseValue > mildGrassThreshold)
                 {
-                    PlaceTile(groundTilemap, mildGrassTile, i, j);
+                    PlaceTile(groundTilemap, mildGrassTile, i, j, (int)TileType.grassMild);
                 }
                 else
                 {
-                    PlaceTile(groundTilemap, baseGrassTile, i, j);
+                    PlaceTile(groundTilemap, baseGrassTile, i, j, (int)TileType.grass);
                 }
             }
         }
@@ -204,30 +208,30 @@ public class TerrainGenerator : MonoBehaviour
                 // To make this look graphically smoother, forest is to be placed before mountains
                 if (noiseValue > heavyForestThreshold)
                 {
-                    PlaceTile(forestTilemap, heavyForestRuleTile, i, j);
+                    PlaceTile(forestTilemap, heavyForestRuleTile, i, j, (int)TileType.heavyForest);
                 } 
                 else if (noiseValue > lightForestBottomThreshold && noiseValue < lightForestTopThreshold)
                 {
-                    PlaceTile(forestTilemap, lightForestRuleTile, i, j);
+                    PlaceTile(forestTilemap, lightForestRuleTile, i, j, (int)TileType.lightForest);
                 }
 
                 if (noiseValue > mountainThreshold)
                 {
-                    PlaceTile(mountainTilemap, mountainRuleTile, i, j);
+                    PlaceTile(mountainTilemap, mountainRuleTile, i, j, (int)TileType.mountain);
                 } 
                 else if (noiseValue > grassTopTheshold && noiseValue < hillsThreshold)
                 {
-                    PlaceTile(mountainTilemap, hillRuleTile, i, j);
+                    PlaceTile(mountainTilemap, hillRuleTile, i, j, (int)TileType.hill);
                 }
 
                 if (noiseValue < grassBottomThreshold && noiseValue > villageThreshold && (i < (width + gridPadding) && i >= gridPadding) && (j < (height + gridPadding) && j >= gridPadding))
                 {
-                    PlaceTile(villageTilemap, villageRuleTile, i, j);
+                    PlaceTile(villageTilemap, villageRuleTile, i, j, (int)TileType.village);
                 }
 
                 if (noiseValue < waterThreshold) 
                 {
-                    PlaceTile(lakeTilemap, lakeRuleTile, i, j);
+                    PlaceTile(lakeTilemap, lakeRuleTile, i, j, (int)TileType.lake);
                 }
 
 
@@ -267,17 +271,98 @@ public class TerrainGenerator : MonoBehaviour
 
         Debug.Log("Terrain generated!");
         isMapSet = true;
-        SetGameTerrainData();
+
+        if(DataManager.Instance != null)
+        {
+            SetGameTerrainData();
+        }
+        
     }
 
 
-
-    private void PlaceTile(Tilemap tilemap, TileBase tile, int gridX, int gridY)
+    //POLYMORPHISM
+    // Place tiles in accordance to a given TileBase, layer, and grid position.  Set the key of the given object.
+    private void PlaceTile(Tilemap tilemap, TileBase tile, int gridX, int gridY, int key)
     {
         Vector3Int coordinates = new Vector3Int(gridX, gridY);
         tilemap.SetTile(coordinates, tile);
+
+        tilemap.GetInstantiatedObject(coordinates).GetComponent<TerrainFeature>().SetTerrainKey(key);
     }
 
+    private void PlaceTile(Tilemap tilemap, SaveableTileData saveableTile)
+    {
+        bool isTilePlaced = true;
+        switch (saveableTile.type)
+        {
+            case (int)TileType.grass:
+                {
+                    tilemap.SetTile(saveableTile.coordinates, baseGrassTile);
+                    break;
+                }
+            case (int)TileType.grassMild:
+                {
+                    tilemap.SetTile(saveableTile.coordinates, mildGrassTile);
+                    break;
+                }
+            case (int)TileType.grassHeavy:
+                {
+                    tilemap.SetTile(saveableTile.coordinates, heavyGrassTile);
+                    break;
+                }
+            case (int)TileType.lightForest:
+                {
+                    tilemap.SetTile(saveableTile.coordinates, lightForestRuleTile);
+                    break;
+                }
+            case (int)TileType.heavyForest:
+                {
+                    tilemap.SetTile(saveableTile.coordinates, heavyForestRuleTile);
+                    break;
+                }
+            case (int)TileType.mountain:
+                {
+                    tilemap.SetTile(saveableTile.coordinates, mountainRuleTile);
+                    break;
+                }
+            case (int)TileType.hill:
+                {
+                    tilemap.SetTile(saveableTile.coordinates, hillRuleTile);
+                    break;
+                }
+            case (int)TileType.lake:
+                {
+                    tilemap.SetTile(saveableTile.coordinates, lakeRuleTile);
+                    break;
+                }
+            case (int)TileType.village:
+                {
+                    tilemap.SetTile(saveableTile.coordinates, villageRuleTile);
+                    break;
+                }
+            case (int)TileType.road:
+                {
+                    Debug.Log("[PLACEHOLDER] Road placed!");
+                    break;
+                }
+            case (int)TileType.bridge:
+                {
+                    Debug.Log("[PLACEHOLDER] Bridge placed!");
+                    break;
+                }
+            default:
+                {
+                    isTilePlaced = false;
+                    Debug.Log("Error loading grid tile: Invalid tile key");
+                    break;
+                }
+        }
+
+        if(isTilePlaced)
+        {
+            SetTileDataFromLoadedData(tilemap, saveableTile);
+        }
+    }
 
 
     private void PlaceRiver(List<TerrainFeatureData> path)
@@ -291,7 +376,7 @@ public class TerrainGenerator : MonoBehaviour
                 terrainGrid.transform.GetChild(i).GetComponent<Tilemap>().SetTile(gridCoordinates, null);
             }
 
-            lakeTilemap.SetTile(gridCoordinates, lakeRuleTile);
+            PlaceTile(lakeTilemap, lakeRuleTile, pathNode.xPos, pathNode.yPos, (int)TileType.lake);
         }
 
         RefreshGridTiles();
@@ -361,9 +446,90 @@ public class TerrainGenerator : MonoBehaviour
     public void SetGameTerrainData()
     {
         DataManager.Instance.Seed = mapSeed;
-        DataManager.Instance.GameGrid = gameGrid;
         DataManager.Instance.Width = width;
         DataManager.Instance.Height = height;
         DataManager.Instance.Padding = gridPadding;
+
+        SetGridTileData();
+    }
+
+    // Set the tile data for the DataManager
+    // NOTE: This should ideally only be called when the game is saved and/or the terrain is generated so as to minimize lag time, and ideally in its own asynchronous call
+    public void SetGridTileData()
+    {
+        DataManager.Instance.TileData.Clear();
+        for (int i = 0; i < terrainGrid.transform.childCount - 1; i++)
+        {
+            Tilemap currentLayer = terrainGrid.transform.GetChild(i).GetComponent<Tilemap>();
+            for (int xPos = 0; xPos < width + gridPadding; xPos++)
+            {
+                for (int yPos = 0; yPos < height + gridPadding; yPos++)
+                {
+                    Vector3Int coordinates = new Vector3Int(xPos, yPos);
+
+                    if (currentLayer.HasTile(coordinates))
+                    {
+                        GameObject currentTile = currentLayer.GetInstantiatedObject(coordinates);
+                        SaveableTileData tileData = new SaveableTileData();
+
+                        if(currentTile.GetComponent<MountainFeature>() != null)
+                        {
+                            tileData.ore = currentTile.GetComponent<MountainFeature>().ore;
+                        }
+                        else if(currentTile.GetComponent<ForestFeature>() != null)
+                        {
+                            tileData.wood = currentTile.GetComponent<ForestFeature>().wood;
+                        }
+                        else if(currentTile.GetComponent<VillageFeature>() != null)
+                        {
+                            tileData.population = currentTile.GetComponent<VillageFeature>().population;
+                        }
+
+                        TerrainFeature feature = currentTile.GetComponent<TerrainFeature>();
+                        tileData.coordinates = coordinates;
+                        tileData.layer = i;
+                        tileData.type = feature.terrainKey;
+
+                        DataManager.Instance.TileData.Add(tileData);
+                    }
+                }
+            }
+        }
+    }
+
+    // Generate the grid based off of the passed-in data from DataManager
+    // NOTE: This should only be called at the beginning of the screen or otherwise asynchronously in its own thread
+    public void LoadFromSavedGrid()
+    {
+        for(int i = 0; i < terrainGrid.transform.childCount; i++)
+        {
+            Tilemap currentLayer = terrainGrid.transform.GetChild(i).gameObject.GetComponent<Tilemap>();
+            List<SaveableTileData> layerTiles = DataManager.Instance.TileData.FindAll(x => x.layer == i);
+            foreach (SaveableTileData tile in layerTiles)
+            {
+                PlaceTile(currentLayer, tile);
+            }
+        }
+    }
+
+    private void SetTileDataFromLoadedData(Tilemap tilemap, SaveableTileData saveableTile)
+    {
+        GameObject currentTile = tilemap.GetInstantiatedObject(saveableTile.coordinates);
+
+        if (currentTile.GetComponent<MountainFeature>() != null)
+        {
+            currentTile.GetComponent<MountainFeature>().ore = saveableTile.ore;
+        }
+        else if (currentTile.GetComponent<ForestFeature>() != null)
+        {
+            currentTile.GetComponent<ForestFeature>().wood = saveableTile.wood;
+        }
+        else if (currentTile.GetComponent<VillageFeature>() != null)
+        {
+            currentTile.GetComponent<VillageFeature>().population = saveableTile.population;
+        }
+
+        TerrainFeature feature = currentTile.GetComponent<TerrainFeature>();
+        feature.SetTerrainKey(saveableTile.type);
     }
 }
