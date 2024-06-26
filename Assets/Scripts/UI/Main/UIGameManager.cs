@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -21,8 +22,15 @@ public class UIGameManager : MonoBehaviour
     [SerializeField] private GameObject mainMenuFromWorldCreationConfirmationScreen;
     [SerializeField] private GameObject exitGameConfirmationScreen;
 
+    [SerializeField] private TextMeshProUGUI pauseScreenStatusText;
+
     [SerializeField] private GameObject saveGameButton;
     [SerializeField] private GameObject loadGameButton;
+
+    [SerializeField] private TMP_InputField saveGameNameInputField;
+
+    private bool isShowingGameSavedText = false;
+    private IEnumerator showGameSavedText;
 
     //ENCAPSULATION
     public bool isGamePaused {  get; private set; }
@@ -144,6 +152,8 @@ public class UIGameManager : MonoBehaviour
     }
 
 
+
+
     // Main pause screen button handler functions
     public void OnResumeGameClicked()
     {
@@ -183,11 +193,13 @@ public class UIGameManager : MonoBehaviour
         SetExitGameConfirmationScreenActive();
     }
 
+
     // Settings menu button/slider handlers
     public void OnApplyClicked()
     {
 
     }
+
 
     // General return handler function
     public void OnReturnClicked()
@@ -229,6 +241,32 @@ public class UIGameManager : MonoBehaviour
     }
 
     
+    // Save game screen button handler
+    public void OnConfirmSaveClikced()
+    {
+        if(isShowingGameSavedText)
+        {
+            StopCoroutine(showGameSavedText);
+        }
+
+        if(DataManager.Instance != null)
+        {
+            DataManager.Instance.SaveName = saveGameNameInputField.text;
+            DataManager.Instance.SaveGame();
+        }
+        else
+        {
+            Debug.Log("Data Manager not present!  Game will not be saved!");
+        }
+
+        showGameSavedText = ShowSaveConfirmationText();
+        StartCoroutine(showGameSavedText);
+
+        SetPauseScreenActive();
+    }
+
+
+
 
     // Handle screen state when the pause button is pressed
     private void HandlePauseButtonPressed()
@@ -257,6 +295,19 @@ public class UIGameManager : MonoBehaviour
             SetMainScreenActive();
             SetActiveGameUIScreenActive();
         }
+    }
+
+
+
+
+    // Thread to show the save confirmation text for a short period of time on the pause screen
+    private IEnumerator ShowSaveConfirmationText()
+    {
+        isShowingGameSavedText = true;
+        pauseScreenStatusText.gameObject.SetActive(true);
+        yield return new WaitForSecondsRealtime(2f);
+        isShowingGameSavedText = false;
+        pauseScreenStatusText.gameObject.SetActive(false);
     }
 
 }

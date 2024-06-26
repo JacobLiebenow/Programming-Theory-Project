@@ -267,6 +267,7 @@ public class TerrainGenerator : MonoBehaviour
 
         Debug.Log("Terrain generated!");
         isMapSet = true;
+        SetGameTerrainData();
     }
 
 
@@ -355,4 +356,14 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
+
+    // Data manager helper function
+    public void SetGameTerrainData()
+    {
+        DataManager.Instance.Seed = mapSeed;
+        DataManager.Instance.GameGrid = gameGrid;
+        DataManager.Instance.Width = width;
+        DataManager.Instance.Height = height;
+        DataManager.Instance.Padding = gridPadding;
+    }
 }

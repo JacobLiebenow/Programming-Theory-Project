@@ -17,19 +17,24 @@ public class DataManager : MonoBehaviour
     public int Height;
     public int Padding;
     public GameObject GameGrid;
-    public int Wood;
-    public int Ore;
-    public int Population;
+    public int Wood = 0;
+    public int Ore = 0;
+    public int Population = 0;
 
     public bool IsGameLoaded {  get; private set; }
+
+    private string protectedDirectory = "Protected";
+    private string savedGamesDirectory = "Saved Games";
+    private string saveManifestName = "gamenamesmanifest";
 
     // Data to save for later between sessions
     [Serializable]
     public class SaveData
     {
-        public List<IndividualSave> data;
+        public List<string> gameNames = new List<string>();
     }
 
+    [Serializable]
     public class IndividualSave
     {
         public string SaveName;
@@ -62,6 +67,7 @@ public class DataManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
+        InitializeDataClass();
         LoadAllGames();
 
     }
@@ -70,8 +76,8 @@ public class DataManager : MonoBehaviour
     // Initialize the internal saved data classes
     private void InitializeDataClass()
     {
+        Debug.Log("Initializing SavedGames...");
         SavedGames = new SaveData();
-        SavedGames.data = new List<IndividualSave>();
     }
 
 
@@ -93,64 +99,100 @@ public class DataManager : MonoBehaviour
         save.Ore = Ore;
         save.Population = Population;
 
-        SavedGames.data.Add(save);
+        string json = JsonUtility.ToJson(save);
+        string path = Application.persistentDataPath + "/" + savedGamesDirectory + "/" + save.SaveName + ".json";
 
+        if(!Directory.Exists(Application.persistentDataPath + "/" + savedGamesDirectory))
+        {
+            Directory.CreateDirectory(Application.persistentDataPath + "/" + savedGamesDirectory);
+        }
+
+        File.WriteAllText(path, json);
+
+        Debug.Log("Data to be written: " + json);
+        Debug.Log("Saving data to: " + path);
+
+        SavedGames.gameNames.Add(save.SaveName);
         SaveAllGames();
+        
     }
 
     private void SaveAllGames()
     {
         string json = JsonUtility.ToJson(SavedGames);
-        File.WriteAllText(Application.persistentDataPath + "savefile.json", json);
+        string path = Application.persistentDataPath + "/" + protectedDirectory + "/" + saveManifestName + ".json";
+
+        if (!Directory.Exists(Application.persistentDataPath + "/" + protectedDirectory))
+        {
+            Directory.CreateDirectory(Application.persistentDataPath + "/" + protectedDirectory);
+        }
+
+        Debug.Log("Data to be written: " + json);
+        Debug.Log("Saving data to: " + path);
+
+        File.WriteAllText(path, json);
+
+        Debug.Log("Game saved successfully!");
     }
     
 
     // Load the entire saved games list, and then choose an individual game from the list to load
     //
     // NOTE: See above note on saved games to potentially increase performance here
+    public void LoadGame(int index = 0)
+    {
+        if (SavedGames.gameNames.Count > 0)
+        {
+            string gaveSaveName = SavedGames.gameNames[index];
+            string path = Application.persistentDataPath + "/" + savedGamesDirectory + "/" + gaveSaveName + ".json";
+
+            if (File.Exists(path))
+            {
+                string json = File.ReadAllText(path);
+                IndividualSave loadedGame = JsonUtility.FromJson<IndividualSave>(json);
+
+                SaveName = loadedGame.SaveName;
+                Seed = loadedGame.Seed;
+                Width = loadedGame.Width;
+                Height = loadedGame.Height;
+                Padding = loadedGame.Padding;
+                GameGrid = loadedGame.GameGrid;
+                Wood = loadedGame.Wood;
+                Ore = loadedGame.Ore;
+                Population = loadedGame.Population;
+
+                IsGameLoaded = true;
+            }
+            else
+            {
+                Debug.Log("Game not found at file location: " + path);
+            }
+        }
+        
+    }
+
     private void LoadAllGames()
     {
-        if (SavedGames == null)
-        {
-            InitializeDataClass();
-        }
 
-        string path = Application.persistentDataPath + "savefile.json";
+        string path = Application.persistentDataPath + "/" + protectedDirectory + "/" + saveManifestName + ".json";
 
         if (File.Exists(path))
         {
             string json = File.ReadAllText(path);
             SaveData loadedData = JsonUtility.FromJson<SaveData>(json);
 
-            SavedGames.data = loadedData.data;
+            SavedGames = loadedData;
         }
-    }
-
-    public void LoadGame(int index = 0)
-    {
-        if (SavedGames.data.Count > 0)
-        {
-            IndividualSave loadedGame = SavedGames.data[index];
-
-            SaveName = loadedGame.SaveName;
-            Seed = loadedGame.Seed;
-            Width = loadedGame.Width;
-            Height = loadedGame.Height;
-            Padding = loadedGame.Padding;
-            GameGrid = loadedGame.GameGrid;
-            Wood = loadedGame.Wood;
-            Ore = loadedGame.Ore;
-            Population = loadedGame.Population;
-
-            IsGameLoaded = true;
-        }
-        
     }
 
 
     // Handle deleting saves from the list by removing the game from the list and then saving the list once again
-    public void DeleteGame(int index)
+    /*public void DeleteGame(int index)
     {
+        if(SaveName == SavedGames.data[index].SaveName)
+        {
+            IsGameLoaded = false;
+        }
         SavedGames.data.RemoveAt(index);
         SaveAllGames();
     }
@@ -158,9 +200,10 @@ public class DataManager : MonoBehaviour
     // Handle clearing all data from a list and then saving the cleared list
     public void DeleteAllGames()
     {
+        IsGameLoaded = false;
         SavedGames.data.Clear();
         SaveAllGames();
-    }
+    }*/
 
 
     // Handle saving, loading, and reseting setting data

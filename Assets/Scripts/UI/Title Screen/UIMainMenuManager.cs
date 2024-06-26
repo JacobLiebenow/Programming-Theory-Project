@@ -19,6 +19,7 @@ public class UIMainMenuManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log("Saves will be saved to : " + Application.persistentDataPath);
         SetMainMenuActive();
     }
 
@@ -86,7 +87,7 @@ public class UIMainMenuManager : MonoBehaviour
     {
         isShowingGameLoadedText = true;
         gameLoadedText.gameObject.SetActive(true);
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSecondsRealtime(2f);
         isShowingGameLoadedText = false;
         gameLoadedText.gameObject.SetActive(false);
     }
