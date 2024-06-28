@@ -433,7 +433,7 @@ public class TerrainGenerator : MonoBehaviour
         return null;
     }
 
-    private void RefreshGridTiles()
+    public void RefreshGridTiles()
     {
         for (int i = 1; i < terrainGrid.transform.childCount; i++)
         {

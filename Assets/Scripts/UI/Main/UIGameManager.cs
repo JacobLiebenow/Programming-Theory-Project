@@ -11,6 +11,7 @@ using UnityEditor;
 public class UIGameManager : MonoBehaviour
 {
     [SerializeField] private TerrainGenerator terrainGenerator;
+    [SerializeField] private UILoadGameScrollViewManager loadGameScrollViewManager;
 
     [SerializeField] private GameObject worldCreationScreen;
     [SerializeField] private GameObject activeGameUIScreen;
@@ -22,18 +23,24 @@ public class UIGameManager : MonoBehaviour
     [SerializeField] private GameObject mainMenuFromWorldCreationConfirmationScreen;
     [SerializeField] private GameObject exitGameConfirmationScreen;
 
-    [SerializeField] private TextMeshProUGUI pauseScreenStatusText;
+    [SerializeField] private TextMeshProUGUI statusText;
 
     [SerializeField] private GameObject saveGameButton;
     [SerializeField] private GameObject loadGameButton;
 
     [SerializeField] private TMP_InputField saveGameNameInputField;
 
-    private bool isShowingGameSavedText = false;
-    private IEnumerator showGameSavedText;
+    private bool isShowingStatusText = false;
+    private IEnumerator showStatusText;
+    private string gameSavedText = "(Game saved!)";
+    private string noSavedGamesFoundText = "(No saved games found!)";
+    private string dataManagerNotFoundText = "(DataManager not found!)";
 
     //ENCAPSULATION
     public bool isGamePaused {  get; private set; }
+
+
+
 
     // Start is called before the first frame update
     void Start()
@@ -160,14 +167,29 @@ public class UIGameManager : MonoBehaviour
         HandlePauseButtonPressed();
     }
 
-    public void OnSaveGameClicked()
+    public void OnSaveGameScreenClicked()
     {
-        SetSaveGameScreenActive();
+        if(DataManager.Instance != null)
+        {
+            SetSaveGameScreenActive();
+        }
+        else
+        {
+            SetStatusTextCoroutine(dataManagerNotFoundText);
+        }
+
     }
 
-    public void OnLoadGameClicked()
+    public void OnLoadGameScreenClicked()
     {
-        SetLoadGameScreenActive();
+        if(DataManager.Instance != null && DataManager.Instance.SavedGames.gameNames.Count > 0)
+        {
+            SetLoadGameScreenActive();
+        }
+        else
+        {
+            SetStatusTextCoroutine(noSavedGamesFoundText);
+        }
     }
 
     public void OnSettingsClicked()
@@ -244,27 +266,29 @@ public class UIGameManager : MonoBehaviour
     // Save game screen button handler
     public void OnConfirmSaveClikced()
     {
-        if(isShowingGameSavedText)
-        {
-            StopCoroutine(showGameSavedText);
-        }
-
         if(DataManager.Instance != null)
         {
             DataManager.Instance.SaveName = saveGameNameInputField.text;
             DataManager.Instance.SaveGame();
+            SetStatusTextCoroutine(gameSavedText);
         }
         else
         {
             Debug.Log("Data Manager not present!  Game will not be saved!");
+            SetStatusTextCoroutine(dataManagerNotFoundText);
         }
-
-        showGameSavedText = ShowSaveConfirmationText();
-        StartCoroutine(showGameSavedText);
 
         SetPauseScreenActive();
     }
 
+
+    // Load game button handler
+    public void OnLoadGameClicked()
+    {
+        DataManager.Instance.SetLoadedGameIndex(loadGameScrollViewManager.currentlySelectedIndex);
+        DataManager.Instance.LoadGame();
+        SceneManager.LoadScene(1);
+    }
 
 
 
@@ -300,14 +324,26 @@ public class UIGameManager : MonoBehaviour
 
 
 
-    // Thread to show the save confirmation text for a short period of time on the pause screen
-    private IEnumerator ShowSaveConfirmationText()
+    // Thread to show the status text for a short period of time on the pause screen
+    private IEnumerator ShowStatusText(string newText)
     {
-        isShowingGameSavedText = true;
-        pauseScreenStatusText.gameObject.SetActive(true);
+        isShowingStatusText = true;
+        statusText.text = newText;
+        statusText.gameObject.SetActive(true);
         yield return new WaitForSecondsRealtime(2f);
-        isShowingGameSavedText = false;
-        pauseScreenStatusText.gameObject.SetActive(false);
+        isShowingStatusText = false;
+        statusText.gameObject.SetActive(false);
     }
 
+    // Separate function to handle the status text coroutine macro-logic 
+    private void SetStatusTextCoroutine(string newText)
+    {
+        if (isShowingStatusText)
+        {
+            StopCoroutine(showStatusText);
+        }
+
+        showStatusText = ShowStatusText(newText);
+        StartCoroutine(showStatusText);
+    }
 }

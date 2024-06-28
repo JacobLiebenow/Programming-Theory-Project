@@ -74,7 +74,6 @@ public class PanCameraMainMenu : MonoBehaviour
         currentStartY = Random.Range(boundsPaddingY, gridHeight - boundsPaddingY);
 
         Vector3Int startingGridCoordinates = new Vector3Int(currentStartX, currentStartY, 0);
-        Debug.Log($"Starting grid coordinates: ({currentStartX}, {currentStartY})");
 
         Vector3 startingCameraPositionRaw = referenceTilemap.CellToWorld(startingGridCoordinates);
 
@@ -93,7 +92,6 @@ public class PanCameraMainMenu : MonoBehaviour
         } while (hypotenuse < minimumTravelDistance);
 
         Vector3Int endingGridCoordinates = new Vector3Int(currentEndX, currentEndY, 0);
-        Debug.Log($"Ending grid coordinates: ({currentEndX}, {currentEndY})");
 
         Vector3 endingCameraPositionRaw = referenceTilemap.CellToWorld(endingGridCoordinates);
         endingCameraPosition = new Vector3(endingCameraPositionRaw.x, endingCameraPositionRaw.y, transform.position.z);

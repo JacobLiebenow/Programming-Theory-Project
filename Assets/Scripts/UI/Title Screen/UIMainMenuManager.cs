@@ -11,10 +11,13 @@ public class UIMainMenuManager : MonoBehaviour
 {
     [SerializeField] private GameObject mainMenuScreen;
     [SerializeField] private GameObject settingsMenuScreen;
-    [SerializeField] private TextMeshProUGUI gameLoadedText;
+    [SerializeField] private GameObject loadGameScreen;
+    [SerializeField] private TextMeshProUGUI noSavedGamesText;
 
-    private bool isShowingGameLoadedText = false;
-    private IEnumerator gameLoadedTextCoroutine;
+    [SerializeField] private UILoadGameScrollViewManager loadGameScrollViewManager;
+
+    private bool isShowingNoSavedGamesText = false;
+    private IEnumerator noSavedGamesTextCoroutine;
 
     // Start is called before the first frame update
     void Start()
@@ -29,12 +32,18 @@ public class UIMainMenuManager : MonoBehaviour
     {
         mainMenuScreen.SetActive(true);
         settingsMenuScreen.SetActive(false);
-
+        loadGameScreen.SetActive(false);
     }
 
     private void SetSettingsMenuActive()
     {
         settingsMenuScreen.SetActive(true);
+        mainMenuScreen.SetActive(false);
+    }
+
+    private void SetLoadGameScreenActive()
+    {
+        loadGameScreen.SetActive(true);
         mainMenuScreen.SetActive(false);
     }
 
@@ -52,19 +61,22 @@ public class UIMainMenuManager : MonoBehaviour
     }
 
     // On load game clicked, load the last game the player played.  Eventually, this will transition to a list view that will allow the player to choose what save they want to load.
-    public void OnLoadGameClicked()
+    public void OnLoadGameScreenClicked()
     {
-        if(isShowingGameLoadedText)
+        if (DataManager.Instance != null && DataManager.Instance.SavedGames.gameNames.Count > 0)
         {
-            StopCoroutine(gameLoadedTextCoroutine);
+            SetLoadGameScreenActive();
         }
+        else
+        {
+            if (isShowingNoSavedGamesText)
+            {
+                StopCoroutine(noSavedGamesTextCoroutine);
+            }
 
-        gameLoadedTextCoroutine = ShowGameLoadedText();
-        StartCoroutine(gameLoadedTextCoroutine);
-
-        // NOTE: The following will eventually be replaced by changing the state to the load screen ListView, where it will be executed there.
-        DataManager.Instance.LoadGame();
-        SceneManager.LoadScene(1);
+            noSavedGamesTextCoroutine = ShowNoSavedGamesText();
+            StartCoroutine(noSavedGamesTextCoroutine);
+        }
     }
 
     // On settings clicked, the settings menu will be loaded for the player, which can be manipulated
@@ -89,14 +101,22 @@ public class UIMainMenuManager : MonoBehaviour
         SetMainMenuActive();
     }
 
+    // From the selected save, load game
+    public void OnLoadGameClicked()
+    {
+        DataManager.Instance.SetLoadedGameIndex(loadGameScrollViewManager.currentlySelectedIndex);
+        DataManager.Instance.LoadGame();
+        SceneManager.LoadScene(1);
+    }
+
 
     // Set a coroutine to show the game loaded text for X seconds, then set it inactive
-    private IEnumerator ShowGameLoadedText()
+    private IEnumerator ShowNoSavedGamesText()
     {
-        isShowingGameLoadedText = true;
-        gameLoadedText.gameObject.SetActive(true);
+        isShowingNoSavedGamesText = true;
+        noSavedGamesText.gameObject.SetActive(true);
         yield return new WaitForSecondsRealtime(2f);
-        isShowingGameLoadedText = false;
-        gameLoadedText.gameObject.SetActive(false);
+        isShowingNoSavedGamesText = false;
+        noSavedGamesText.gameObject.SetActive(false);
     }
 }

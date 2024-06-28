@@ -22,6 +22,7 @@ public class DataManager : MonoBehaviour
     public List<SaveableTileData> TileData = new List<SaveableTileData>();
 
     public bool IsGameLoaded {  get; private set; }
+    public int LoadedGameIndex { get; private set; }
 
     private string protectedDirectory = "Protected";
     private string savedGamesDirectory = "Saved Games";
@@ -32,6 +33,8 @@ public class DataManager : MonoBehaviour
     public class SaveData
     {
         public List<string> gameNames = new List<string>();
+        public List<string> dates = new List<string>();
+        public List<string> times = new List<string>();
     }
 
     [Serializable]
@@ -69,6 +72,7 @@ public class DataManager : MonoBehaviour
 
         InitializeDataClass();
         LoadAllGames();
+        LoadedGameIndex = 0;
 
     }
 
@@ -127,6 +131,8 @@ public class DataManager : MonoBehaviour
         Debug.Log("Saving data to: " + path);
 
         SavedGames.gameNames.Add(save.SaveName);
+        SavedGames.dates.Add(DateTime.Now.Date.ToString());
+        SavedGames.times.Add(DateTime.Now.TimeOfDay.ToString());
         SaveAllGames();
         
     }
@@ -151,11 +157,11 @@ public class DataManager : MonoBehaviour
     
 
     // Load a saved game based off the given index from its individual save file
-    public void LoadGame(int index = 0)
+    public void LoadGame()
     {
         if (SavedGames.gameNames.Count > 0)
         {
-            string gaveSaveName = SavedGames.gameNames[index];
+            string gaveSaveName = SavedGames.gameNames[LoadedGameIndex];
             string path = Application.persistentDataPath + "/" + savedGamesDirectory + "/" + gaveSaveName + ".json";
 
             if (File.Exists(path))
@@ -232,5 +238,11 @@ public class DataManager : MonoBehaviour
     public void ResetSettings()
     {
 
+    }
+
+   
+    public void SetLoadedGameIndex(int i)
+    {
+        LoadedGameIndex = i;
     }
 }
