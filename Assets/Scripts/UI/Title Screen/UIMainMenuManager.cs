@@ -15,6 +15,7 @@ public class UIMainMenuManager : MonoBehaviour
     [SerializeField] private GameObject deleteGameConfirmationScreen;
 
     [SerializeField] private TextMeshProUGUI noSavedGamesText;
+    [SerializeField] private TMP_Dropdown gameSortDropdown;
 
     [SerializeField] private UILoadGameScrollViewManager loadGameScrollViewManager;
 
@@ -25,6 +26,7 @@ public class UIMainMenuManager : MonoBehaviour
     void Start()
     {
         Debug.Log("Saves will be saved to : " + Application.persistentDataPath);
+        gameSortDropdown.value = (int)UILoadGameScrollViewManager.SortOptions.TimeDesc;
         SetMainMenuActive();
     }
 
@@ -141,6 +143,11 @@ public class UIMainMenuManager : MonoBehaviour
     public void OnReturnFromDeleteGameConfirmationScreenClicked()
     {
         SetLoadGameScreenActive();
+    }
+
+    public void OnSortDropdownChanged()
+    {
+        loadGameScrollViewManager.SortList(gameSortDropdown.value);
     }
 
 

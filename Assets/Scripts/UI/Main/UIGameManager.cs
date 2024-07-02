@@ -33,6 +33,8 @@ public class UIGameManager : MonoBehaviour
 
     [SerializeField] private TMP_InputField saveGameNameInputField;
 
+    [SerializeField] private TMP_Dropdown gameSortDropdown;
+
     private bool isShowingStatusText = false;
     private IEnumerator showStatusText;
     private string gameSavedText = "(Game saved!)";
@@ -57,7 +59,9 @@ public class UIGameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if(!terrainGenerator.isMapSet)
+        gameSortDropdown.value = (int)UILoadGameScrollViewManager.SortOptions.TimeDesc;
+
+        if (!terrainGenerator.isMapSet)
         {
             SetWorldCreationScreenActive();
         }
@@ -337,6 +341,10 @@ public class UIGameManager : MonoBehaviour
         SetLoadGameConfirmationScreenActive();
     }
 
+    public void OnSortDropdownChanged()
+    {
+        loadGameScrollViewManager.SortList(gameSortDropdown.value);
+    }
 
 
     // Handle screen state when the pause button is pressed
@@ -421,6 +429,7 @@ public class UIGameManager : MonoBehaviour
             DataManager.Instance.SaveName = saveGameNameInputField.text;
             DataManager.Instance.SaveGame();
             SetStatusTextCoroutine(gameSavedText);
+            loadGameScrollViewManager.SortList(gameSortDropdown.value);
         }
         else
         {

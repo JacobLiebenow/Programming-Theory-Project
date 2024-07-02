@@ -33,8 +33,7 @@ public class DataManager : MonoBehaviour
     public class SaveData
     {
         public List<string> gameNames = new List<string>();
-        public List<string> dates = new List<string>();
-        public List<string> times = new List<string>();
+        public List<string> timestamps = new List<string>();
     }
 
     [Serializable]
@@ -134,20 +133,18 @@ public class DataManager : MonoBehaviour
         if(SavedGames.gameNames.Contains(save.SaveName))
         {
             int index = SavedGames.gameNames.IndexOf(save.SaveName);
-            SavedGames.dates[index] = DateTime.Now.Date.ToString();
-            SavedGames.times[index] = DateTime.Now.TimeOfDay.ToString();
+            SavedGames.timestamps[index] = DateTime.Now.ToString();
         } 
         else
         {
             SavedGames.gameNames.Add(save.SaveName);
-            SavedGames.dates.Add(DateTime.Now.Date.ToString());
-            SavedGames.times.Add(DateTime.Now.TimeOfDay.ToString());
+            SavedGames.timestamps.Add(DateTime.Now.ToString());
         }
         SaveAllGames();
         
     }
 
-    private void SaveAllGames()
+    public void SaveAllGames()
     {
         string json = JsonUtility.ToJson(SavedGames);
         string path = Application.persistentDataPath + "/" + protectedDirectory + "/" + saveManifestName + ".json";
@@ -218,9 +215,7 @@ public class DataManager : MonoBehaviour
     public void DeleteGame(int index, string gameName)
     {
         SavedGames.gameNames.RemoveAt(index);
-        SavedGames.dates.RemoveAt(index);
-        SavedGames.times.RemoveAt(index);
-
+        SavedGames.timestamps.RemoveAt(index);
         string path = Application.persistentDataPath + "/" + savedGamesDirectory + "/" + gameName + ".json";
         if (File.Exists(path)) 
         { 
