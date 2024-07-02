@@ -130,9 +130,19 @@ public class DataManager : MonoBehaviour
         Debug.Log("Data to be written: " + json);
         Debug.Log("Saving data to: " + path);
 
-        SavedGames.gameNames.Add(save.SaveName);
-        SavedGames.dates.Add(DateTime.Now.Date.ToString());
-        SavedGames.times.Add(DateTime.Now.TimeOfDay.ToString());
+        // If the saved game already exists, overwrite it in the manifest.  Otherwise, add it to the manifest.
+        if(SavedGames.gameNames.Contains(save.SaveName))
+        {
+            int index = SavedGames.gameNames.IndexOf(save.SaveName);
+            SavedGames.dates[index] = DateTime.Now.Date.ToString();
+            SavedGames.times[index] = DateTime.Now.TimeOfDay.ToString();
+        } 
+        else
+        {
+            SavedGames.gameNames.Add(save.SaveName);
+            SavedGames.dates.Add(DateTime.Now.Date.ToString());
+            SavedGames.times.Add(DateTime.Now.TimeOfDay.ToString());
+        }
         SaveAllGames();
         
     }
@@ -205,23 +215,18 @@ public class DataManager : MonoBehaviour
 
 
     // Handle deleting saves from the list by removing the game from the list and then saving the list once again
-    /*public void DeleteGame(int index)
+    public void DeleteGame(int index, string gameName)
     {
-        if(SaveName == SavedGames.data[index].SaveName)
-        {
-            IsGameLoaded = false;
-        }
-        SavedGames.data.RemoveAt(index);
-        SaveAllGames();
-    }
+        SavedGames.gameNames.RemoveAt(index);
+        SavedGames.dates.RemoveAt(index);
+        SavedGames.times.RemoveAt(index);
 
-    // Handle clearing all data from a list and then saving the cleared list
-    public void DeleteAllGames()
-    {
-        IsGameLoaded = false;
-        SavedGames.data.Clear();
-        SaveAllGames();
-    }*/
+        string path = Application.persistentDataPath + "/" + savedGamesDirectory + "/" + gameName + ".json";
+        if (File.Exists(path)) 
+        { 
+            File.Delete(path);
+        }
+    }
 
 
     // Handle saving, loading, and reseting setting data

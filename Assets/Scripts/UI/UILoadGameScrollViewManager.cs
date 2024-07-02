@@ -12,6 +12,7 @@ public class UILoadGameScrollViewManager : MonoBehaviour
 
     public bool isLoaded {  get; private set; }
     public int currentlySelectedIndex {  get; private set; }
+    public string currentlySelectedName { get; private set; }
 
     // Start is called before the first frame update
     void Start()
@@ -87,6 +88,7 @@ public class UILoadGameScrollViewManager : MonoBehaviour
     {
         contentField.GetChild(currentlySelectedIndex).GetComponent<UILoadGameScrollElement>().ToggleSelection();
         currentlySelectedIndex = i;
+        currentlySelectedName = DataManager.Instance.SavedGames.gameNames[i];
         contentField.GetChild(currentlySelectedIndex).GetComponent<UILoadGameScrollElement>().ToggleSelection();
     }
 

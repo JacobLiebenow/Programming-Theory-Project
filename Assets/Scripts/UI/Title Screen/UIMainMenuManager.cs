@@ -12,6 +12,8 @@ public class UIMainMenuManager : MonoBehaviour
     [SerializeField] private GameObject mainMenuScreen;
     [SerializeField] private GameObject settingsMenuScreen;
     [SerializeField] private GameObject loadGameScreen;
+    [SerializeField] private GameObject deleteGameConfirmationScreen;
+
     [SerializeField] private TextMeshProUGUI noSavedGamesText;
 
     [SerializeField] private UILoadGameScrollViewManager loadGameScrollViewManager;
@@ -30,21 +32,34 @@ public class UIMainMenuManager : MonoBehaviour
     // Screen transition functions
     private void SetMainMenuActive()
     {
+        ResetScreens();
         mainMenuScreen.SetActive(true);
-        settingsMenuScreen.SetActive(false);
-        loadGameScreen.SetActive(false);
     }
 
     private void SetSettingsMenuActive()
     {
+        ResetScreens();
         settingsMenuScreen.SetActive(true);
-        mainMenuScreen.SetActive(false);
     }
 
     private void SetLoadGameScreenActive()
     {
+        ResetScreens();
         loadGameScreen.SetActive(true);
+    }
+
+    private void SetDeleteGameConfirmationScreenActive()
+    {
+        ResetScreens();
+        deleteGameConfirmationScreen.SetActive(true);
+    }
+
+    private void ResetScreens()
+    {
         mainMenuScreen.SetActive(false);
+        settingsMenuScreen.SetActive(false);
+        loadGameScreen.SetActive(false);
+        deleteGameConfirmationScreen.SetActive(false);
     }
 
 
@@ -107,6 +122,25 @@ public class UIMainMenuManager : MonoBehaviour
         DataManager.Instance.SetLoadedGameIndex(loadGameScrollViewManager.currentlySelectedIndex);
         DataManager.Instance.LoadGame();
         SceneManager.LoadScene(1);
+    }
+
+    // From the load screen, confirm that the player wants to delete the game
+    public void OnDeleteGameClicked()
+    {
+        SetDeleteGameConfirmationScreenActive();
+    }
+
+    // From the delete game confirmation screen, delete the selected game
+    public void OnDeleteGameConfirmClicked()
+    {
+        DataManager.Instance.DeleteGame(loadGameScrollViewManager.currentlySelectedIndex, loadGameScrollViewManager.currentlySelectedName);
+        loadGameScrollViewManager.UpdateListObjects();
+        SetLoadGameScreenActive();
+    }
+
+    public void OnReturnFromDeleteGameConfirmationScreenClicked()
+    {
+        SetLoadGameScreenActive();
     }
 
 

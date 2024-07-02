@@ -19,9 +19,12 @@ public class UIGameManager : MonoBehaviour
     [SerializeField] private GameObject settingsScreen;
     [SerializeField] private GameObject saveGameScreen;
     [SerializeField] private GameObject loadGameScreen;
+    [SerializeField] private GameObject loadGameConfirmationScreen;
     [SerializeField] private GameObject mainMenuConfirmationScreen;
     [SerializeField] private GameObject mainMenuFromWorldCreationConfirmationScreen;
     [SerializeField] private GameObject exitGameConfirmationScreen;
+    [SerializeField] private GameObject overwriteSaveConfirmationScreen;
+    [SerializeField] private GameObject deleteGameConfirmationScreen;
 
     [SerializeField] private TextMeshProUGUI statusText;
 
@@ -38,7 +41,16 @@ public class UIGameManager : MonoBehaviour
 
     //ENCAPSULATION
     public bool isGamePaused {  get; private set; }
+    
+    private enum SaveGameStates
+    {
+        saveGame = 0,
+        saveAndLoad = 1,
+        saveAndMainMenu = 2,
+        saveAndQuit = 3
+    }
 
+    private int saveState = 0;
 
 
 
@@ -90,15 +102,10 @@ public class UIGameManager : MonoBehaviour
     private void SetPauseScreenActive()
     {
         Time.timeScale = 0f;
+        ResetScreenStates();
         pauseScreen.SetActive(true);
-        settingsScreen.SetActive(false);
-        saveGameScreen.SetActive(false);
-        loadGameScreen.SetActive(false);
-        mainMenuConfirmationScreen.SetActive(false);
-        mainMenuFromWorldCreationConfirmationScreen.SetActive(false);
-        exitGameConfirmationScreen.SetActive(false);
 
-        if(terrainGenerator.isMapSet)
+        if(DataManager.Instance != null || terrainGenerator.isMapSet)
         {
             saveGameButton.SetActive(true);
             loadGameButton.SetActive(true);
@@ -112,53 +119,77 @@ public class UIGameManager : MonoBehaviour
 
     private void SetSettingsScreenActive()
     {
-        pauseScreen.SetActive(false);
+        ResetScreenStates();
         settingsScreen.SetActive(true);
     }
 
     private void SetMainScreenActive()
     {
+        ResetScreenStates();
         Time.timeScale = 1f;
-        pauseScreen.SetActive(false);
-        settingsScreen.SetActive(false);
-        saveGameScreen.SetActive(false);
-        loadGameScreen.SetActive(false);
-        mainMenuConfirmationScreen.SetActive(false);
-        mainMenuFromWorldCreationConfirmationScreen.SetActive(false);
-        exitGameConfirmationScreen.SetActive(false);
     }
 
     private void SetSaveGameScreenActive()
     {
-        pauseScreen.SetActive(false);
+        ResetScreenStates();
         saveGameScreen.SetActive(true);
     }
 
     private void SetLoadGameScreenActive()
     {
-        pauseScreen.SetActive(false);
+        ResetScreenStates();
         loadGameScreen.SetActive(true);
+    }
+    
+    private void SetLoadGameConfirmationScreenActive()
+    {
+        ResetScreenStates();
+        loadGameConfirmationScreen.SetActive(true);
     }
 
     private void SetMainMenuConfirmationScreenActive()
     {
+        ResetScreenStates();
         mainMenuConfirmationScreen.SetActive(true);
-        pauseScreen.SetActive(false);
     }
 
     private void SetMainMenuFromWorldCreationConfirmationScreenActive()
     {
+        ResetScreenStates();
         mainMenuFromWorldCreationConfirmationScreen.SetActive(true);
-        pauseScreen.SetActive(false);
     }
 
     private void SetExitGameConfirmationScreenActive()
     {
+        ResetScreenStates();
         exitGameConfirmationScreen.SetActive(true);
-        pauseScreen.SetActive(false);
     }
 
+    private void SetOverwriteSaveConfirmationScreenActive()
+    {
+        ResetScreenStates();
+        overwriteSaveConfirmationScreen.SetActive(true);
+    }
 
+    private void SetDeleteGameConfirmationScreenActive()
+    {
+        ResetScreenStates();
+        deleteGameConfirmationScreen.SetActive(true);
+    }
+
+    private void ResetScreenStates()
+    {
+        pauseScreen.SetActive(false);
+        settingsScreen.SetActive(false);
+        saveGameScreen.SetActive(false);
+        loadGameScreen.SetActive(false);
+        loadGameConfirmationScreen.SetActive(false);
+        mainMenuConfirmationScreen.SetActive(false);
+        mainMenuFromWorldCreationConfirmationScreen.SetActive(false);
+        exitGameConfirmationScreen.SetActive(false);
+        overwriteSaveConfirmationScreen.SetActive(false);
+        deleteGameConfirmationScreen.SetActive(false);
+    }
 
 
     // Main pause screen button handler functions
@@ -230,64 +261,80 @@ public class UIGameManager : MonoBehaviour
     }
 
     // Confirmation screen handler functions
+    public void OnLoadGameSaveClicked()
+    {
+        saveState = (int)SaveGameStates.saveAndLoad;
+        SetSaveGameScreenActive();
+    }
+
+    public void OnLoadGameWithoutSaveClicked()
+    {
+        LoadGame();
+    }
+
     public void OnReturnToMainMenuSaveClicked()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(0);
+        saveState = (int)SaveGameStates.saveAndMainMenu;
+        SetSaveGameScreenActive();
     }
 
     public void OnReturnToMainMenuWithoutSaveClicked()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(0);
+        ReturnToMainMenu();
     }
 
     public void OnExitSaveClicked()
     {
-        Time.timeScale = 1f;
-#if UNITY_EDITOR
-        EditorApplication.ExitPlaymode();
-#else
-        Application.Quit();
-#endif
+        saveState = (int)SaveGameStates.saveAndQuit;
+        SetSaveGameScreenActive();
     }
 
     public void OnExitWithoutSaveClicked()
     {
-        Time.timeScale = 1f;
-#if UNITY_EDITOR
-        EditorApplication.ExitPlaymode();
-#else
-        Application.Quit();
-#endif
+        QuitGame();
+    }
+
+    public void OnOverwriteSaveConfirmClicked()
+    {
+        HandleSaveGame();
+    }
+
+    public void OnDeleteGameClicked()
+    {
+        SetDeleteGameConfirmationScreenActive();
+    }
+
+    public void OnDeleteGameConfirmClicked()
+    {
+        DeleteGame();
+        SetLoadGameScreenActive();
+    }
+
+    public void OnReturnFromDeleteGameClicked()
+    {
+        SetLoadGameScreenActive();
     }
 
     
     // Save game screen button handler
-    public void OnConfirmSaveClikced()
+    public void OnConfirmSaveClicked()
     {
-        if(DataManager.Instance != null)
+        if(DataManager.Instance != null && DataManager.Instance.SavedGames.gameNames.Contains(saveGameNameInputField.text))
         {
-            DataManager.Instance.SaveName = saveGameNameInputField.text;
-            DataManager.Instance.SaveGame();
-            SetStatusTextCoroutine(gameSavedText);
+            SetOverwriteSaveConfirmationScreenActive();
         }
         else
         {
-            Debug.Log("Data Manager not present!  Game will not be saved!");
-            SetStatusTextCoroutine(dataManagerNotFoundText);
+            HandleSaveGame();
         }
-
-        SetPauseScreenActive();
+        
     }
 
 
     // Load game button handler
     public void OnLoadGameClicked()
     {
-        DataManager.Instance.SetLoadedGameIndex(loadGameScrollViewManager.currentlySelectedIndex);
-        DataManager.Instance.LoadGame();
-        SceneManager.LoadScene(1);
+        SetLoadGameConfirmationScreenActive();
     }
 
 
@@ -346,4 +393,70 @@ public class UIGameManager : MonoBehaviour
         showStatusText = ShowStatusText(newText);
         StartCoroutine(showStatusText);
     }
+
+    private void HandleSaveGame()
+    {
+        SaveGameFromUI();
+        switch (saveState)
+        {
+            case (int)SaveGameStates.saveAndLoad:
+                LoadGame();
+                break;
+            case (int)SaveGameStates.saveAndMainMenu:
+                ReturnToMainMenu();
+                break;
+            case (int)SaveGameStates.saveAndQuit:
+                QuitGame();
+                break;
+            default:
+                SetPauseScreenActive();
+                break;
+        }
+    }
+
+    private void SaveGameFromUI()
+    {
+        if (DataManager.Instance != null)
+        {
+            DataManager.Instance.SaveName = saveGameNameInputField.text;
+            DataManager.Instance.SaveGame();
+            SetStatusTextCoroutine(gameSavedText);
+        }
+        else
+        {
+            Debug.Log("Data Manager not present!  Game will not be saved!");
+            SetStatusTextCoroutine(dataManagerNotFoundText);
+        }
+    }
+
+    private void LoadGame()
+    {
+        Time.timeScale = 1f;
+        DataManager.Instance.SetLoadedGameIndex(loadGameScrollViewManager.currentlySelectedIndex);
+        DataManager.Instance.LoadGame();
+        SceneManager.LoadScene(1);
+    }
+
+    private void DeleteGame()
+    {
+        DataManager.Instance.DeleteGame(loadGameScrollViewManager.currentlySelectedIndex, loadGameScrollViewManager.currentlySelectedName);
+        loadGameScrollViewManager.UpdateListObjects();
+    }
+
+    private void ReturnToMainMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(0);
+    }
+
+    private void QuitGame()
+    {
+        Time.timeScale = 1f;
+#if UNITY_EDITOR
+        EditorApplication.ExitPlaymode();
+#else
+        Application.Quit();
+#endif
+    }
+
 }
