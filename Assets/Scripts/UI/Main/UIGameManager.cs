@@ -343,7 +343,10 @@ public class UIGameManager : MonoBehaviour
 
     public void OnSortDropdownChanged()
     {
-        loadGameScrollViewManager.SortList(gameSortDropdown.value);
+        if(DataManager.Instance != null)
+        {
+            loadGameScrollViewManager.SortList(gameSortDropdown.value);
+        }
     }
 
 

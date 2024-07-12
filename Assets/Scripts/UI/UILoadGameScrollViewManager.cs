@@ -28,7 +28,10 @@ public class UILoadGameScrollViewManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SortList();
+        if(DataManager.Instance != null)
+        {
+            SortList();
+        }
     }
 
     // Update is called once per frame
