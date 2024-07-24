@@ -8,7 +8,9 @@ using UnityEngine.Tilemaps;
 
 public class TerrainGenerator : MonoBehaviour
 {
-    private Pathfinding pathfinding;
+    [SerializeField] private GameManager gameManager;
+
+    public Pathfinding pathfinding;
     [SerializeField] private GameObject gameGrid;
 
     [SerializeField] private Grid terrainGrid;
@@ -28,6 +30,7 @@ public class TerrainGenerator : MonoBehaviour
     [SerializeField] private RuleTile hillRuleTile;
     [SerializeField] private RuleTile lakeRuleTile;
     [SerializeField] private RuleTile villageRuleTile;
+    [SerializeField] private RuleTile dirtRoadRuleTile;
 
     [SerializeField] private float terrainOffsetX = 50f;
     [SerializeField] private float terrainOffsetY = 50f;
@@ -227,6 +230,8 @@ public class TerrainGenerator : MonoBehaviour
                 if (noiseValue < grassBottomThreshold && noiseValue > villageThreshold && (i < (width + gridPadding) && i >= gridPadding) && (j < (height + gridPadding) && j >= gridPadding))
                 {
                     PlaceTile(villageTilemap, villageRuleTile, i, j, (int)TileType.village);
+                    gameManager.AddVillage(i, j);
+                    //PlaceTile(roadTilemap, dirtRoadRuleTile, i, j, (int)TileType.road);
                 }
 
                 if (noiseValue < waterThreshold) 
@@ -266,7 +271,7 @@ public class TerrainGenerator : MonoBehaviour
 
         if(isMakingRiver)
         {
-            PlaceRiver(pathfinding.FindPath(startX, startY, endX, endY, false, 0));
+            PlaceRiver(pathfinding.FindPath(startX, startY, endX, endY, false, (int)PathTypes.riverPath));
         }
 
         Debug.Log("Terrain generated!");
@@ -338,11 +343,12 @@ public class TerrainGenerator : MonoBehaviour
             case (int)TileType.village:
                 {
                     tilemap.SetTile(saveableTile.coordinates, villageRuleTile);
+                    gameManager.AddVillage(saveableTile.coordinates);
                     break;
                 }
             case (int)TileType.road:
                 {
-                    Debug.Log("[PLACEHOLDER] Road placed!");
+                    tilemap.SetTile(saveableTile.coordinates, dirtRoadRuleTile);
                     break;
                 }
             case (int)TileType.bridge:

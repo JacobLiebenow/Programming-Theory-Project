@@ -34,12 +34,6 @@ public class UILoadGameScrollViewManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void UpdateListObjects()
     {
         if(DataManager.Instance != null && DataManager.Instance.SavedGames.gameNames.Count > 0)

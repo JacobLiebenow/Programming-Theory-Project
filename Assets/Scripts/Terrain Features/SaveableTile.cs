@@ -19,11 +19,12 @@ public class SaveableTileData
 public enum TilemapLayer
 {
     groundLayer = 0,
-    forestLayer = 1,
-    mountainLayer = 2,
-    waterLayer = 3,
-    villageLayer = 4,
-    roadLayer = 5
+    waterLayer = 1,
+    roadLayer = 2,
+    forestLayer = 3,
+    mountainLayer = 4,
+    villageLayer = 5,
+    
 }
 
 [Serializable]

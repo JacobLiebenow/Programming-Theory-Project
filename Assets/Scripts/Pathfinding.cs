@@ -6,6 +6,13 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
 
+public enum PathTypes
+{
+    riverPath = 0,
+    roadBuilding = 1,
+    roadConnection = 2
+}
+
 public class Pathfinding
 {
     private const int MOVE_STRAIGHT_COST = 10;
@@ -206,6 +213,7 @@ public class Pathfinding
     }
 
     // TODO: Implement diagonal neighbor finding algorithm (Top left, top right, bottom left, bottom right)
+    // CURRENTLY NOT IMPLEMENTED
     private List<TerrainFeatureData> GetDiagonalNeighbors(TerrainFeatureData currentFeature)
     {
         List<TerrainFeatureData> neighborFeatures = new List<TerrainFeatureData>();

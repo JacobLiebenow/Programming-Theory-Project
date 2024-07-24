@@ -6,6 +6,9 @@ using UnityEngine.XR;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private UIGameManager gameManagerUI;
+    [SerializeField] private TerrainGenerator worldManager;
+
     [SerializeField] private Camera mainCamera;
 
     [SerializeField] private Grid terrainGrid;
@@ -18,10 +21,16 @@ public class GameManager : MonoBehaviour
     private float cellOffset = 0.5f;
     private float cellLayerOffset = -7;
 
+    private List<Vector2> villageCoordinates = new List<Vector2>();
+    private List<Vector2> roadCoordinates = new List<Vector2>();
+
+    public bool isGameOver { get; private set; } = false;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        Debug.Log("There are " + villageCoordinates.Count + " villages."); 
+        Debug.Log(villageCoordinates);
     }
 
     // Update is called once per frame
@@ -40,6 +49,10 @@ public class GameManager : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 PlaceRoad(currentCell, dirtRoadTile);
+                if (!isGameOver && AllVillagesHavePath())
+                {
+                    Debug.Log("Congratulations!");
+                }
             }
             else if (Input.GetMouseButtonDown(1))
             {
@@ -72,11 +85,13 @@ public class GameManager : MonoBehaviour
     void PlaceRoad(Vector3Int currentCell, RuleTile roadTile)
     {
         roadTilemap.SetTile(currentCell, roadTile);
+        roadCoordinates.Add(new Vector2(currentCell.x, currentCell.y));
     }
 
     void RemoveRoad(Vector3Int currentCell)
     {
         roadTilemap.SetTile(currentCell, null);
+        roadCoordinates.Remove(new Vector2(currentCell.x, currentCell.y));
     }
 
     // Acquire the cell the mouse is currently hovered over
@@ -95,4 +110,49 @@ public class GameManager : MonoBehaviour
 
         return cellPositionNormalized;
     }
+
+
+    private bool AllVillagesHavePath()
+    {
+        foreach (Vector2 villageCoordinate in villageCoordinates)
+        {
+            // This is a placeholder function for later
+            // Eventually, pathfinding will be enabled here to ensure that each village can be reached by roads
+            if(!roadCoordinates.Contains(villageCoordinate))
+            {
+                // Note: it may not be necessary eventually to set isGameOver to false here
+                // in the future, as there might be a post-game where this isn't a factor
+                isGameOver = false;
+                return false;
+            }
+        }
+
+        isGameOver = true;
+        return true;
+    }
+
+
+
+    public void ResetVillageList()
+    {
+        villageCoordinates.Clear();
+    }
+
+    public void AddVillage(int x, int y)
+    {
+        Vector2 coordinates = new Vector2(x, y);
+        villageCoordinates.Add(coordinates);
+    }
+
+    public void AddVillage(Vector2 coordinates)
+    {
+        villageCoordinates.Add(coordinates);
+    }
+
+    public void AddVillage(Vector3Int coordinates)
+    {
+        Vector2 newCoordinates = new Vector2(coordinates.x, coordinates.y);
+        villageCoordinates.Add(newCoordinates);
+    }
+    
 }

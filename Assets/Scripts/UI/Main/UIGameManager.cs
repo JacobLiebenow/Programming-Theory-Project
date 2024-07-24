@@ -471,4 +471,18 @@ public class UIGameManager : MonoBehaviour
 #endif
     }
 
+
+    // When the game is over, display either the success or failure screen (failure default)
+    public void GameOver(bool success = false)
+    {
+        if (success)
+        {
+            Debug.Log("Congratulations!");
+        }
+        else
+        {
+            Debug.Log("Game over!");
+        }
+
+    }
 }

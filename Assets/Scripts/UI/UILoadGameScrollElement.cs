@@ -25,12 +25,6 @@ public class UILoadGameScrollElement : MonoBehaviour
         scrollViewManager = transform.parent.parent.parent.GetComponent<UILoadGameScrollViewManager>();
     }
 
-    private void Update()
-    { 
-
-    }
-
-
     // Text element initialization handler functions
     private void SetIndexText(string newText)
     {

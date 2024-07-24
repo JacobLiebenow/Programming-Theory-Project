@@ -13212,6 +13212,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b830a3c2ac6c7a54f83f0531d4d6104e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameManagerUI: {fileID: 1832343130}
+  worldManager: {fileID: 1734187567}
   mainCamera: {fileID: 963194227}
   terrainGrid: {fileID: 876963175}
   roadTilemap: {fileID: 830595005}
@@ -14868,6 +14870,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ab8f5b5a759264ebf7ad6cdc250323, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameManager: {fileID: 1475643598}
   gameGrid: {fileID: 876963174}
   terrainGrid: {fileID: 876963175}
   groundTilemap: {fileID: 483402192}
@@ -14885,6 +14888,7 @@ MonoBehaviour:
   hillRuleTile: {fileID: 11400000, guid: bfc8195865207f6458723ee5fa340ea1, type: 2}
   lakeRuleTile: {fileID: 11400000, guid: e5436ac28ccc9c04d9f4fd3fdf8a2a6f, type: 2}
   villageRuleTile: {fileID: 11400000, guid: 6c85490994e929b4ab5c69286a41abf5, type: 2}
+  dirtRoadRuleTile: {fileID: 0}
   terrainOffsetX: 50
   terrainOffsetY: 50
   noiseFrequency: 9
